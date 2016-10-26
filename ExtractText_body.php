@@ -135,6 +135,11 @@ class ExtExtractText {
 		$text = str_replace("(, ", '(', $text);
 		$text = str_replace(";,", ',', $text);
 
+		// em and strong
+		$text = str_replace("'''''", '', $text);
+		$text = str_replace("'''", '', $text);
+		$text = str_replace("''", '', $text);
+		
 		// lets keep it plain plain plain
 		$text = strip_tags($text);
 
