@@ -8,7 +8,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 $GLOBALS['wgExtensionCredits']['parserhook'][] = array(
 	'path' => __FILE__,
 	'name' => 'ExtractText',
-	'version' => '0.1',
+	'version' => '0.2',
 	'url' => 'https://github.com/SimilisTools/mediawiki-ExtractText',
 	'author' => array( 'Toniher' ),
 	'descriptionmsg' => 'extracttext-desc',
