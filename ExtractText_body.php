@@ -26,7 +26,7 @@ class ExtExtractText
     public static function extracttext(&$parser, $frame, $args)
     {
         // $parser->disableCache();
-        $parser->getOutput()->updateCacheExpiry(0);
+        // $parser->getOutput()->updateCacheExpiry(0);
 
         $num = 50;
         $extra = "";
@@ -47,7 +47,7 @@ class ExtExtractText
     public static function extractpagetext(&$parser, $frame, $args)
     {
         // $parser->disableCache();
-        $parser->getOutput()->updateCacheExpiry(0);
+        // $parser->getOutput()->updateCacheExpiry(0);
         $text = "";
         $num = 50;
         $extra = "";
