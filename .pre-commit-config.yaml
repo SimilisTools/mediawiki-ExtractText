@@ -1,0 +1,24 @@
+# .pre-commit-config.yaml
+---
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-json
+        name: Check JSON files
+        files: \.(json)$
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v2.7.1
+    hooks:
+      - id: prettier
+        name: Format PHP files with prettier
+        files: \.(php)$
+        additional_dependencies:
+          - "@prettier/plugin-php"
+  - repo: https://github.com/digitalpulp/pre-commit-php.git
+    rev: 1.4.0
+    hooks:
+      - id: php-lint-all
+        files: \.(php)$
+      - id: php-cs-fixer
+        files: \.(php)$

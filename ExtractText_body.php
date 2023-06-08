@@ -1,180 +1,174 @@
 <?php
 
-class ExtExtractText {
+class ExtExtractText
+{
+    /**
+     * The rendering object (skin)
+     */
+    private $display = null;
 
-	/**
-	* The rendering object (skin)
-	*/
-	private $display=NULL;
+    /**
+     * @param $parser Parser
+     * @return bool
+     */
+    public function clearState(&$parser)
+    {
+        $parser->pf_ifexist_breakdown = [];
+        return true;
+    }
 
+    /**
+     * @param $parser Parser
+     * @param $frame PPFrame
+     * @param $args array
+     * @return string
+     */
+    public static function extracttext(&$parser, $frame, $args)
+    {
+        // $parser->disableCache();
+        $parser->getOutput()->updateCacheExpiry(0);
 
-	/**
-	 * @param $parser Parser
-	 * @return bool
-	 */
-	function clearState(&$parser) {
-		$parser->pf_ifexist_breakdown = array();
-		return true;
-	}
+        $num = 50;
+        $extra = "";
 
-	/**
-	 * @param $parser Parser
-	 * @param $frame PPFrame
-	 * @param $args array
-	 * @return string
-	 */
-	public static function extracttext( &$parser, $frame, $args ) {
+        if (isset($args[1])) {
+            $num = $frame->expand($args[1]);
+        }
 
-		$parser->disableCache();
-		
-		$num = 50;
-		$extra = "";
-		
-		if ( isset($args[1]) ) {
-			$num = $frame->expand( $args[1]);
-		}
-		
-		if ( isset($args[2]) ) {
-			$extra = $frame->expand( $args[2]);
-		}
-		
-		return isset( $args[0] ) ? self::dewikify( $frame->expand( $args[0] ), $num, $extra ) : '';
+        if (isset($args[2])) {
+            $extra = $frame->expand($args[2]);
+        }
 
-	}
-	
-	
-	public static function extractpagetext ( &$parser, $frame, $args  ) {
-		
-		$parser->disableCache();
-		
-		$text = "";
-		$num = 50;
-		$extra = "";
-		
-		
-		//Page
-		if ( isset($args[0]) ) {
-	    		
-			$titleObject = Title::newFromText(trim(strip_tags($frame->expand($args[0]))));
-			if ( $titleObject->exists() ) {
-				$wikipage = WikiPage::factory( $titleObject );
-				$text = $wikipage->getText();
-			}
-		}
-		
-		if ( isset($args[1]) ) {
-			$num = $frame->expand( $args[1]);
-		}
-		
-		if ( isset($args[2]) ) {
-			$extra = $frame->expand( $args[2]);
-		}
-		
-		return isset( $args[0] ) ? self::dewikify( $text, $num, $extra ) : '';
-		
-	}
-	
+        return isset($args[0])
+            ? self::dewikify($frame->expand($args[0]), $num, $extra)
+            : "";
+    }
 
-	private static function dewikify($text, $num=50, $end="") {
-		// first get rid of HTML tags
-		$text = strip_tags($text);
+    public static function extractpagetext(&$parser, $frame, $args)
+    {
+        // $parser->disableCache();
+        $parser->getOutput()->updateCacheExpiry(0);
+        $text = "";
+        $num = 50;
+        $extra = "";
 
-		// remove large blocks (treat as tags)
-		$text = preg_replace('/\{\{([^\}]+)?\}\}/', '', $text);
+        //Page
+        if (isset($args[0])) {
+            $titleObject = Title::newFromText(
+                trim(strip_tags($frame->expand($args[0])))
+            );
+            if ($titleObject->exists()) {
+                $wikipage = WikiPage::factory($titleObject);
+                $content = $wikipage->getContent();
+                $text = ContentHandler::getContentText($content);
+            }
+        }
 
-		$text = preg_replace("/(<![^>]+>)/", '', $text);
-		$text = preg_replace('/\{\{\s?/', '', $text);
-		$text = str_replace('}}', '', $text);
+        if (isset($args[1])) {
+            $num = $frame->expand($args[1]);
+        }
 
-		$text = str_replace('<! />', '', $text);
+        if (isset($args[2])) {
+            $extra = $frame->expand($args[2]);
+        }
 
-		// more wiki formatting
-		//$text = preg_replace("/'{2,6}/", '', $text);
+        return isset($args[0]) ? self::dewikify($text, $num, $extra) : "";
+    }
 
-		// Remove between ==
-		$text = preg_replace("/\=.*\=/", '', $text);
+    private static function dewikify($text, $num = 50, $end = "")
+    {
+        // first get rid of HTML tags
+        $text = strip_tags($text);
 
+        // remove large blocks (treat as tags)
+        $text = preg_replace("/\{\{([^\}]+)?\}\}/", "", $text);
 
-		// drop page link text
-		$text = preg_replace('/\[\[([^:\|\]]+)\|([^:\]]+)\]\]/', "$2", $text);
+        $text = preg_replace("/(<![^>]+>)/", "", $text);
+        $text = preg_replace("/\{\{\s?/", "", $text);
+        $text = str_replace("}}", "", $text);
 
+        $text = str_replace("<! />", "", $text);
 
-		// or keep it with preg_replace('/\[\[([^:\|\]]+)\|([^:\]]+)\]\]/', "$1 ($2)", $text);
+        // more wiki formatting
+        //$text = preg_replace("/'{2,6}/", '', $text);
 
-		$text = preg_replace('/\(\[[^\]]+\]\)/', '', $text);
-		$text = preg_replace('/\*?\s?\[\[([^\|]]+)\]\]/', '', $text);
-		$text = preg_replace('/\*\s?\[([^\s]+)\s([^\]]+)\]/', "$2", $text);
-		$text = preg_replace('/\[\[([^\]]+)\|([^\]]+)\]\]/', "$2", $text);
+        // Remove between ==
+        $text = preg_replace("/\=.*\=/", "", $text);
 
-		$text = preg_replace('/\[\[([^\]]+)\]\]/', "$1", $text);
+        // drop page link text
+        $text = preg_replace("/\[\[([^:\|\]]+)\|([^:\]]+)\]\]/", "$2", $text);
 
-		$text = preg_replace('/\n(\*+\s?)/', '', $text);
-		$text = preg_replace('/\n{3,}/', "\n\n", $text);
-		$text = preg_replace('/<ref[^>]?>[^>]+>/', '', $text);
-		$text = preg_replace('/<cite[^>]?>[^>]+>/', '', $text);
+        // or keep it with preg_replace('/\[\[([^:\|\]]+)\|([^:\]]+)\]\]/', "$1 ($2)", $text);
 
-		$text = preg_replace('/\s*={2,}\s*/', "\r\n", $text);
-		$text = preg_replace('/{?class="[^"]+"/', "", $text);
-		$text = preg_replace('/!?\s?width="[^"]+"/', "", $text);
-		$text = preg_replace('/!?\s?height="[^"]+"/', "", $text);
-		$text = preg_replace('/!?\s?style="[^"]+"/', "", $text);
-		$text = preg_replace('/!?\s?rowspan="[^"]+"/', "", $text);
-		$text = preg_replace('/!?\s?bgcolor="[^"]+"/', "", $text);
+        $text = preg_replace("/\(\[[^\]]+\]\)/", "", $text);
+        $text = preg_replace("/\*?\s?\[\[([^\|]]+)\]\]/", "", $text);
+        $text = preg_replace("/\*\s?\[([^\s]+)\s([^\]]+)\]/", "$2", $text);
+        $text = preg_replace("/\[\[([^\]]+)\|([^\]]+)\]\]/", "$2", $text);
 
-		$text = preg_replace('/\[([^\]]+)\s+([^\]]+)\]/', " $2", $text);
+        $text = preg_replace("/\[\[([^\]]+)\]\]/", "$1", $text);
 
+        $text = preg_replace('/\n(\*+\s?)/', "", $text);
+        $text = preg_replace('/\n{3,}/', "\n\n", $text);
+        $text = preg_replace("/<ref[^>]?>[^>]+>/", "", $text);
+        $text = preg_replace("/<cite[^>]?>[^>]+>/", "", $text);
 
-		$text = trim($text);
+        $text = preg_replace("/\s*={2,}\s*/", "\r\n", $text);
+        $text = preg_replace('/{?class="[^"]+"/', "", $text);
+        $text = preg_replace('/!?\s?width="[^"]+"/', "", $text);
+        $text = preg_replace('/!?\s?height="[^"]+"/', "", $text);
+        $text = preg_replace('/!?\s?style="[^"]+"/', "", $text);
+        $text = preg_replace('/!?\s?rowspan="[^"]+"/', "", $text);
+        $text = preg_replace('/!?\s?bgcolor="[^"]+"/', "", $text);
 
-		//$text = preg_replace('/\n\n/', "<br />\n<br />\n", $text);
-		//$text = preg_replace('/\r\n\r\n/', "<br />\r\n<br />\r\n", $text);
+        $text = preg_replace("/\[([^\]]+)\s+([^\]]+)\]/", " $2", $text);
 
-		$text = str_replace(" ,", ',', $text);
-		$text = str_replace(", ", ',', $text);
-		$text = str_replace(",", ', ', $text);
-		$text = str_replace("(, ", '(', $text);
-		$text = str_replace(";,", ',', $text);
+        $text = trim($text);
 
-		// em and strong
-		$text = str_replace("'''''", '', $text);
-		$text = str_replace("'''", '', $text);
-		$text = str_replace("''", '', $text);
-		
-		// lets keep it plain plain plain
-		$text = strip_tags($text);
+        //$text = preg_replace('/\n\n/', "<br />\n<br />\n", $text);
+        //$text = preg_replace('/\r\n\r\n/', "<br />\r\n<br />\r\n", $text);
 
-		if (isset($num) && is_numeric($num)) {
-	
-		$extra = "";
-		
-		if (isset($end)) {
-			$extra = $end;
-		}
-		
-		$text = self::get_snippet($text, $num);
-		$text = $text.$extra;
+        $text = str_replace(" ,", ",", $text);
+        $text = str_replace(", ", ",", $text);
+        $text = str_replace(",", ", ", $text);
+        $text = str_replace("(, ", "(", $text);
+        $text = str_replace(";,", ",", $text);
 
-	}
+        // em and strong
+        $text = str_replace("'''''", "", $text);
+        $text = str_replace("'''", "", $text);
+        $text = str_replace("''", "", $text);
 
-	return($text);
+        // lets keep it plain plain plain
+        $text = strip_tags($text);
+
+        if (isset($num) && is_numeric($num)) {
+            $extra = "";
+
+            if (isset($end)) {
+                $extra = $end;
+            }
+
+            $text = self::get_snippet($text, $num);
+            $text = $text . $extra;
+        }
+
+        return $text;
+    }
+
+    private static function get_snippet($str, $wordCount = 50)
+    {
+        return implode(
+            "",
+            array_slice(
+                preg_split(
+                    "/([\s,\.;\?\!]+)/",
+                    $str,
+                    $wordCount * 2 + 1,
+                    PREG_SPLIT_DELIM_CAPTURE
+                ),
+                0,
+                $wordCount * 2 - 1
+            )
+        );
+    }
 }
-
-	private static function  get_snippet( $str, $wordCount = 50 ) {
-	
-		return implode( 
-		'', 
-		array_slice( 
-		preg_split(
-		'/([\s,\.;\?\!]+)/', 
-		$str, 
-		$wordCount*2+1, 
-		PREG_SPLIT_DELIM_CAPTURE
-		),
-		0,
-		$wordCount*2-1
-		)
-		);
-	}
-
-}
-?>

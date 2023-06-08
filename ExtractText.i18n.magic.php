@@ -1,9 +1,9 @@
 <?php
 
-$magicWords = array();
+$magicWords = [];
 
 /** English (English) */
-$magicWords['en'] = array(
-	'extracttext'    => array( 0, 'extracttext' ),
-        'extractpagetext'    => array( 0, 'extractpagetext' )
-);
+$magicWords["en"] = [
+    "extracttext" => [0, "extracttext"],
+    "extractpagetext" => [0, "extractpagetext"],
+];
