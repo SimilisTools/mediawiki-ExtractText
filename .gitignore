@@ -1,3 +1,8 @@
-vendor/
+*~
+*.kate-swp
+.*.swp
+node_modules/**
+vendor/**
 composer.lock
-.php-cs-fixer.cache
+/.eslintcache
+.vectorcode/
