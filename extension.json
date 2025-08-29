@@ -1,0 +1,26 @@
+{
+    "name": "ExtractText",
+    "version": "0.3.0",
+    "author": ["Toniher"],
+    "url": "https://github.com/SimilisTools/mediawiki-ExtractText",
+    "descriptionmsg": "extracttext-desc",
+    "type": "parserhook",
+    "AutoloadClasses": {
+        "ExtExtractText": "ExtractText_body.php",
+        "MediaWiki\\Extension\\ExtractText\\Hooks": "includes/Hooks.php"
+    },
+    "MessagesDirs": {
+        "ExtractText": [
+            "i18n"
+        ]
+    },
+    "ExtensionMessagesFiles": {
+        "ExtractTextMagic": "ExtractText.i18n.magic.php"
+    },
+    "Hooks": {
+        "ParserFirstCallInit": "MediaWiki\\Extension\\ExtractText\\Hooks::onParserFirstCallInit",
+        "ParserClearState": "MediaWiki\\Extension\\ExtractText\\Hooks::onParserClearState"
+    },
+    "manifest_version": 2
+}
+
