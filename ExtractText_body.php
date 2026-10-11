@@ -11,9 +11,8 @@ class ExtExtractText
      * @param $parser Parser
      * @return bool
      */
-    public function clearState(&$parser)
+    public function clearState($parser)
     {
-        $parser->pf_ifexist_breakdown = [];
         return true;
     }
 
@@ -23,7 +22,7 @@ class ExtExtractText
      * @param $args array
      * @return string
      */
-    public static function extracttext(&$parser, $frame, $args)
+    public static function extracttext($parser, $frame, $args)
     {
         // $parser->disableCache();
         // $parser->getOutput()->updateCacheExpiry(0);
@@ -44,7 +43,7 @@ class ExtExtractText
             : "";
     }
 
-    public static function extractpagetext(&$parser, $frame, $args)
+    public static function extractpagetext($parser, $frame, $args)
     {
         // $parser->disableCache();
         // $parser->getOutput()->updateCacheExpiry(0);
@@ -58,9 +57,9 @@ class ExtExtractText
                 trim(strip_tags($frame->expand($args[0])))
             );
             if ($titleObject->exists()) {
-                $wikipage = WikiPage::factory($titleObject);
+                $wikipage = \MediaWiki\MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $titleObject );
                 $content = $wikipage->getContent();
-                $text = ContentHandler::getContentText($content);
+                $text = $content instanceof \TextContent ? $content->getText() : "";
             }
         }
 
